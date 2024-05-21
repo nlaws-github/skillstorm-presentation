@@ -1,0 +1,77 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Parameters:
+  ApiName:
+    Type: String
+  CFEndpoint:
+    Type: String
+  FunctionName1:
+    Type: String
+  RoleArn1:
+    Type: String
+  TableName1:
+    Type: String
+  SnsTopicArn1:
+    Type: String
+  FunctionName2:
+    Type: String
+  RoleArn2:
+    Type: String
+  TableName2:
+    Type: String
+  SQSQueueDeleteArn2:
+    Type: String
+  SQSQueueGetArn2:
+    Type: String
+  SQSQueuePutArn2:
+    Type: String
+
+
+
+Resources:
+  NestedStack1:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./templates/api_gwy.yaml
+      Parameters:
+        ApiName: !Ref ApiName
+        CFEndpoint: !Ref CFEndpoint
+
+
+  NestedStack2:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./templates/ddb.yaml
+      Parameters: 
+        TableName1: !Ref TableName1
+
+
+  NestedStack3:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./templates/ddb-lambda.yaml
+      Parameters:
+        FunctionName1: !Ref FunctionName1
+        RoleArn1: !Ref RoleArn1
+        TableName1: !Ref TableName1
+        SnsTopicArn1: !Ref SnsTopicArn1
+
+  NestedStack4:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./templates/ddb-sqs.yaml
+      Parameters: 
+        TableName2: !Ref TableName2
+
+      
+  NestedStack5:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./templates/worker-lambda.yaml
+      Parameters:
+        FunctionName2: !Ref FunctionName2
+        RoleArn2: !Ref RoleArn2
+        TableName2: !Ref TableName2
+        SQSQueueDeleteArn2: !Ref SQSQueueDeleteArn2
+        SQSQueueGetArn2: !Ref SQSQueueGetArn2
+        SQSQueuePutArn2: !Ref SQSQueuePutArn2

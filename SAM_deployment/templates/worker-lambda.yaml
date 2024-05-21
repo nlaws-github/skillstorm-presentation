@@ -1,0 +1,83 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  FunctionName2:
+    Type: String
+  RoleArn2:
+    Type: String
+  TableName2:
+    Type: String
+  SQSQueueDeleteArn2:
+    Type: String
+  SQSQueueGetArn2:
+    Type: String
+  SQSQueuePutArn2:
+    Type: String
+
+Resources:
+  MyFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Ref FunctionName2
+      Handler: worker.lambda_handler
+      Runtime: python3.8
+      CodeUri: ./functions/worker.py
+      Role: !Ref RoleArn2
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref TableName2 
+
+  MyFunctionSQSDeletePolicy:
+    DependsOn: MyFunction
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt MyFunction.Arn
+      Action: lambda:InvokeFunction
+      Principal: sqs.amazonaws.com
+      SourceArn: !Ref SQSQueueDeleteArn2
+
+  MyFunctionSQSGetPolicy:
+    DependsOn: MyFunction
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt MyFunction.Arn
+      Action: lambda:InvokeFunction
+      Principal: sqs.amazonaws.com
+      SourceArn: !Ref SQSQueueGetArn2
+
+  MyFunctionSQSPutPolicy:
+    DependsOn: MyFunction
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt MyFunction.Arn
+      Action: lambda:InvokeFunction
+      Principal: sqs.amazonaws.com
+      SourceArn: !Ref SQSQueuePutArn2
+
+  MyFunctionSQSDeleteEventMapping:
+    Type: AWS::Lambda::EventSourceMapping
+    DependsOn: MyFunction
+    Properties:
+      BatchSize: 10
+      Enabled: true
+      EventSourceArn: !Ref SQSQueueDeleteArn2
+      FunctionName: !GetAtt MyFunction.Arn
+
+  MyFunctionSQSGetEventMapping:
+    Type: AWS::Lambda::EventSourceMapping
+    DependsOn: MyFunction
+    Properties:
+      BatchSize: 10
+      Enabled: true
+      EventSourceArn: !Ref SQSQueueGetArn2
+      FunctionName: !GetAtt MyFunction.Arn
+
+  MyFunctionSQSPutEventMapping:
+    Type: AWS::Lambda::EventSourceMapping
+    DependsOn: MyFunction
+    Properties:
+      BatchSize: 10
+      Enabled: true
+      EventSourceArn: !Ref SQSQueuePutArn2
+      FunctionName: !GetAtt MyFunction.Arn

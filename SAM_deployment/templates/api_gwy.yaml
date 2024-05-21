@@ -1,0 +1,65 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+
+Parameters:
+  CFEndpoint:
+    Type: String 
+  ApiName:
+    Type: String
+  
+
+Resources:
+  MyApi: 
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: v1
+      CorsConfiguration:
+        AllowOrigins: !Ref CFEndpoint
+        AllowHeaders:
+          - 'content-type'
+        AllowMethods:
+          - 'GET'
+          - 'PUT'
+          - 'DELETE'
+        MaxAge: 1
+        AllowCredentials: true
+      DefinitionBody:
+        openapi: "3.0.1"
+        info:
+          title: !Ref ApiName
+          version: "1.0.0"
+        paths:
+          /items:
+            get:
+              responses:
+                '200':
+                  description: 'OK'
+                  content:
+                    application/json:
+                      schema:
+                        type: string
+            put:
+              responses:
+                '200':
+                  description: 'OK'
+                  content:
+                    application/json:
+                      schema:
+                        type: string
+          /items/{id}:
+            get:
+              responses:
+                '200':
+                  description: 'OK'
+                  content:
+                    application/json:
+                      schema:
+                        type: string
+            delete:
+              responses:
+                '200':
+                  description: 'OK'
+                  content:
+                    application/json:
+                      schema:
+                        type: string

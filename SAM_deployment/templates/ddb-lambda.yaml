@@ -1,0 +1,26 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  FunctionName1:
+    Type: String
+  RoleArn1:
+    Type: String
+  TableName1:
+    Type: String
+  SnsTopicArn1:
+    Type: String
+
+Resources:
+  MyFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Ref FunctionName1
+      Handler: lambda_ddb.lambda_handler 
+      Runtime: python3.8
+      CodeUri: ./functions/lambda_ddb.py 
+      Role: !Ref RoleArn1
+      Environment: 
+        Variables:
+          TABLE_NAME: !Ref TableName1
+          SNS_TOPIC_ARN: !Ref SnsTopicArn1
