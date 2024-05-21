@@ -7,7 +7,6 @@ dynamodb = boto3.resource("dynamodb")
 table_name = os.environ['TABLE_NAME'] 
 table = dynamodb.Table(table_name)
 
-
 sns_client = boto3.client('sns')
 sns_topic_arn = os.environ['SNS_TOPIC_ARN']
 
@@ -33,13 +32,14 @@ def lambda_handler(event, context):
     }
 
     try:
-        if event['routeKey'] == "DELETE /items/{id}":
+        route_key = event['routeKey']
+        if route_key == "DELETE /items/{id}":
             # Delete item based on id 
             table.delete_item(Key={'id': event['pathParameters']['id']})
             body = 'Deleted item ' + event['pathParameters']['id']
             publish_to_sns(body, 'delete')
 
-        elif event['routeKey'] == "GET /items/{id}":
+        elif route_key == "GET /items/{id}":
             # Retrieve an item by ID and include the new attributes in the response
             response = table.get_item(Key={'id': event['pathParameters']['id']})
             if 'Item' in response:
@@ -50,27 +50,40 @@ def lambda_handler(event, context):
                     'email': item.get('email', ''),
                     'filename': item.get('filename', '')
                 }
-                
                 publish_to_sns(f'Retrieved item {event["pathParameters"]["id"]}', 'get')
             else:
                 statusCode = 404
                 body = f"Item with id {event['pathParameters']['id']} not found."
 
-        elif event['routeKey'] == "GET /items":
-            # Scan the table and include the new attributes for each item in the response
-            response = table.scan()
-            items = response.get('Items', [])
-            body = [
-                {'id': item['id'],
-                 'name': item.get('name', ''),
-                 'email': item.get('email', ''),
-                 'filename': item.get('filename', '')
-                } for item in items
-            ]
-            
-            publish_to_sns('Retrieved all items', 'get')
+        elif route_key == "GET /items":
+            # Check if query parameters are present
+            query_params = event.get('queryStringParameters', {})
+            if query_params and 'id' in query_params:
+                # Construct the query parameters for DynamoDB
+                query_kwargs = {
+                    'KeyConditionExpression': 'id = :id',
+                    'ExpressionAttributeValues': {
+                        ':id': query_params['id']
+                    }
+                }
+                response = table.query(**query_kwargs)
+                items = response.get('Items', [])
+                body = items
+                publish_to_sns('Retrieved items based on query', 'get')
+            else:
+                # Scan the table and include the new attributes for each item in the response
+                response = table.scan()
+                items = response.get('Items', [])
+                body = [
+                    {'id': item['id'],
+                     'name': item.get('name', ''),
+                     'email': item.get('email', ''),
+                     'filename': item.get('filename', '')
+                    } for item in items
+                ]
+                publish_to_sns('Retrieved all items', 'get')
 
-        elif event['routeKey'] == "PUT /items":
+        elif route_key == "PUT /items":
             # Parse the request body and put the item with new attributes into the DynamoDB table
             requestJSON = json.loads(event['body'])
             table.put_item(
