@@ -1,6 +1,8 @@
 import boto3
 import botocore
 import time
+import argparse
+
 
 
 def create_oai(caller_reference):
@@ -132,12 +134,23 @@ def create_cloudfront_distribution(caller_reference, s3_bucket_domain, acm_certi
     print("Successfully created CloudFront distribution:", response)
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Create CloudFront distribution")
+    parser.add_argument("--domain-name", required=True, help="The domain name for the ACM certificate")
+    args = parser.parse_args()
+
     caller_reference = 'project-' + str(int(time.time()))
     local_file_path = '../HTML/index.html'
     s3_key = 'index.html'
     s3_bucket_domain = fetch_s3_bucket_domain(local_file_path, s3_key)
-    domain_name = 'aws-tfbd.com'
+    domain_name = args.domain_name
     acm_certificate_arn = fetch_acm_certificate_arn(domain_name)
+
+    # Call function to create OAI
+    oai_id = create_oai(caller_reference)
+
+    # Call function to create CF distro
+    create_cloudfront_distribution(caller_reference, s3_bucket_domain, acm_certificate_arn, oai_id)
+
 
 
     #Call function to create OAI

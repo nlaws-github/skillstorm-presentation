@@ -40,7 +40,7 @@ def lambda_handler(event, context):
             publish_to_sns(body, 'delete')
 
         elif route_key == "GET /items/{id}":
-            # Retrieve an item by ID and include the new attributes in the response
+            # Retrieve item by ID and include the new attributes in the response
             response = table.get_item(Key={'id': event['pathParameters']['id']})
             if 'Item' in response:
                 item = response['Item']

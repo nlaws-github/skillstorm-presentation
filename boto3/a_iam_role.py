@@ -31,7 +31,8 @@ def create_iam_role(role_name, managed_policy_arns):
                 PolicyArn=policy_arn
             )
 
-        print(f"IAM role '{role_name}' with the specified managed policies has been created.")
+        role_arn = role_response['Role']['Arn']
+        print(f"IAM role '{role_name}' with ARN '{role_arn}' and the specified managed policies has been created.")
 
     except Exception as e:
         print(f"An error occurred: {e}")
