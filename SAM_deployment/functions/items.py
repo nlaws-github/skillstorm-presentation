@@ -33,6 +33,7 @@ def lambda_handler(event, context):
 
     try:
         route_key = event['routeKey']
+        
         if route_key == "DELETE /items/{id}":
             # Delete item based on id 
             table.delete_item(Key={'id': event['pathParameters']['id']})

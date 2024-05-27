@@ -9,8 +9,8 @@ def create_sns_topic(topic_name):
         Name=topic_name,
         Tags=[
             {
-                'Key': 'name',
-                'Value': 'nlaws'
+                'Key': 'project',
+                'Value': 'tfbd-nll'
             }
         ]
     )
@@ -23,8 +23,8 @@ def create_sqs_queue(queue_name):
             'VisibilityTimeout': '30'
         },
         tags={
-            'Key': 'name',
-            'Value': 'nlaws'
+            'Key': 'project',
+            'Value': 'tfbd-nll'
         }
     )
     return response['QueueUrl'], queue_name

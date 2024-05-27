@@ -1,5 +1,4 @@
 import boto3
-import argparse
 
 iam_client = boto3.client('iam')
 
@@ -37,17 +36,9 @@ def create_iam_role(role_name, managed_policy_arns):
     except Exception as e:
         print(f"An error occurred: {e}")
 
-# Ensure that specific code only executes when the script is run directly, allowing for modular and reusable code
+# Main script execution
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Create IAM role with specified managed policies")
-    parser.add_argument("--auto-role-name", action="store_true", help="Automatically generate a role name")
-    parser.add_argument("--role-name", help="The name of the IAM role to create")
-    args = parser.parse_args()
-
-    if args.auto_role_name:
-        role_name = input("Enter a name for the IAM role: ")
-    else:
-        role_name = args.role_name
+    role_name = input("Enter the name for the IAM role: ")
 
     if role_name:
         create_iam_role(role_name, managed_policy_arns)

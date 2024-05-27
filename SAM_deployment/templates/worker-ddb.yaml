@@ -2,7 +2,7 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
 
 Parameters:
-  TableName1:
+  TableName2:
     Type: String
     Description: Name for the DynamoDB table
 
@@ -14,12 +14,17 @@ Resources:
   MyDynamoDBTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: !Ref TableName1
+      TableName: !Ref TableName2
       AttributeDefinitions:
-        - AttributeName: id
+        - AttributeName: message
+          AttributeType: S
+        - AttributeName: timestamp
           AttributeType: S
       KeySchema:
-        - AttributeName: id
+        - AttributeName: message
           KeyType: HASH
-      BillingMode: PAY_PER_REQUEST
-
+        - AttributeName: timestamp
+          KeyType: RANGE
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5

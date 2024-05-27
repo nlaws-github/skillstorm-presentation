@@ -1,9 +1,6 @@
 import boto3
 import botocore
 import time
-import argparse
-
-
 
 def create_oai(caller_reference):
     cloudfront_client = boto3.client('cloudfront')
@@ -19,8 +16,6 @@ def create_oai(caller_reference):
     # Return OAI ID
     return response['CloudFrontOriginAccessIdentity']['Id']
 
-
-
 def fetch_acm_certificate_arn(domain_name):
     acm_client = boto3.client('acm')
     certificates = acm_client.list_certificates()
@@ -34,7 +29,6 @@ def fetch_acm_certificate_arn(domain_name):
         raise Exception("No ACM certificates found for the specified domain name.")
     else:
         raise Exception("No ACM certificates found.")
-
 
 def fetch_s3_bucket_domain(local_file_path, s3_key):
     s3_client = boto3.client('s3')
@@ -55,7 +49,6 @@ def fetch_s3_bucket_domain(local_file_path, s3_key):
             else:
                 raise
 
-    
     bucket_name = input("Enter the bucket name: ")  
     s3_client.create_bucket(Bucket=bucket_name)
     s3_client.put_bucket_tagging(
@@ -72,17 +65,12 @@ def fetch_s3_bucket_domain(local_file_path, s3_key):
     local_file_path = '../HTML/index.html'
     s3_key = 'index.html'
     domain_name = f"{bucket_name}.s3.amazonaws.com"
-
    
     s3_client.upload_file(local_file_path, bucket_name, s3_key)
 
     return domain_name
-    
-
-
 
 def create_cloudfront_distribution(caller_reference, s3_bucket_domain, acm_certificate_arn, oai_id):
-    
     cloudfront_client = boto3.client('cloudfront')
 
     # Define distro config
@@ -125,35 +113,26 @@ def create_cloudfront_distribution(caller_reference, s3_bucket_domain, acm_certi
             'MaxTTL': 31536000,
             'Compress': True
         },
-        'Enabled': True  #
+        'Enabled': True
     }
 
     # Create CF distro
     response = cloudfront_client.create_distribution(DistributionConfig=distribution_config)
-
     print("Successfully created CloudFront distribution:", response)
 
+#run main workflow
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Create CloudFront distribution")
-    parser.add_argument("--domain-name", required=True, help="The domain name for the ACM certificate")
-    args = parser.parse_args()
-
     caller_reference = 'project-' + str(int(time.time()))
     local_file_path = '../HTML/index.html'
     s3_key = 'index.html'
     s3_bucket_domain = fetch_s3_bucket_domain(local_file_path, s3_key)
-    domain_name = args.domain_name
+
+    
+    domain_name = input("Enter the domain name for the ACM certificate: ")
+    
     acm_certificate_arn = fetch_acm_certificate_arn(domain_name)
 
     # Call function to create OAI
-    oai_id = create_oai(caller_reference)
-
-    # Call function to create CF distro
-    create_cloudfront_distribution(caller_reference, s3_bucket_domain, acm_certificate_arn, oai_id)
-
-
-
-    #Call function to create OAI
     oai_id = create_oai(caller_reference)
 
     # Call function to create CF distro
