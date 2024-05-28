@@ -122,7 +122,7 @@ def create_cloudfront_distribution(caller_reference, s3_bucket_domain, acm_certi
 
 #run main workflow
 if __name__ == "__main__":
-    caller_reference = 'project-' + str(int(time.time()))
+    caller_reference = 'project-' + str(int(time.time())) 
     local_file_path = '../HTML/index.html'
     s3_key = 'index.html'
     s3_bucket_domain = fetch_s3_bucket_domain(local_file_path, s3_key)

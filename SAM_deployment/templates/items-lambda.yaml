@@ -16,9 +16,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Ref FunctionName1
-      Handler: lambda_ddb.lambda_handler 
+      Handler: items.lambda_handler 
       Runtime: python3.8
-      CodeUri: ./functions/lambda_ddb.py 
+      CodeUri: ./functions/items.py 
       Role: !Ref RoleArn1
       Environment: 
         Variables:
